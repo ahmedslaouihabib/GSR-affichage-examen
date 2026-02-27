@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Affichage Examen</title>
+
+  <style>
+    :root{
+      --blue:#0b2a66;
+      --blue2:#163b9a;
+      --red:#e53935;
+      --redSoft:#fde8e8;
+      --bg:#ffffff;
+      --grey:#e5e7eb;
+      --text:#0f172a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    /* Top bar */
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px 12px 6px;
+      position:relative;
+    }
+    .logo{
+      position:absolute;
+      left:14px;
+      top:12px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .logo img{
+      height:42px;             /* ajuste ici si trop petit */
+      width:auto;
+      object-fit:contain;
+      display:block;
+    }
+    .title{
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--blue2);
+      font-size:18px;
+    }
+
+    /* Big clock + remaining */
+    .hero{
+      padding:4px 16px 10px;
+      text-align:center;
+    }
+    .date{
+      color:var(--blue2);
+      font-weight:900;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:18px;
+      margin-top:6px;
+    }
+    .bigclock{
+      font-size:92px;
+      font-weight:1000;
+      line-height:1;
+      margin:8px 0 0;
+      color:#111827;
+    }
+    .sub{
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      align-items:baseline;
+      margin-top:6px;
+    }
+    .sub .label{
+      color:#6b7280;
+      font-weight:900;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:14px;
+    }
+    .sub .remain{
+      font-weight:1000;
+      color:var(--blue2);
+      font-size:34px;
+    }
+
+    /* Icons row */
+    .rules{
+      display:flex;
+      justify-content:center;
+      gap:18px;
+      padding:14px 10px 8px;
+      flex-wrap:wrap;
+    }
+    .rule{
+      width:118px;
+      height:118px;
+      border:4px solid var(--red);
+      border-radius:14px;
+      background:var(--redSoft);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:10px;
+      text-align:center;
+    }
+    .rule svg{width:46px;height:46px}
+    .rule .txt{
+      margin-top:8px;
+      font-weight:1000;
+      color:var(--red);
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      font-size:14px;
+      line-height:1.05;
+    }
+
+    /* Cards row */
+    .cards{
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      padding:10px 12px;
+      flex-wrap:wrap;
+    }
+    .card{
+      width:320px;
+      border:3px solid var(--grey);
+      border-radius:10px;
+      padding:14px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      background:#fff;
+    }
+    .card.primary{
+      border-color:var(--blue2);
+      background:#eef3ff;
+    }
+    .card .k{
+      font-weight:1000;
+      color:var(--blue2);
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-size:14px;
+    }
+    .card .v{
+      font-weight:1000;
+      font-size:44px;
+      color:#111827;
+      letter-spacing:.02em;
+    }
+    .badge{
+      width:240px;
+      border:3px solid var(--blue2);
+      border-radius:10px;
+      padding:14px 16px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:#fff;
+      font-weight:1000;
+      color:var(--blue2);
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:18px;
+      gap:10px;
+    }
+
+    /* Progress bar */
+    .barWrap{
+      display:flex;
+      justify-content:center;
+      padding:6px 12px 12px;
+    }
+    .bar{
+      width:min(1180px,92vw);
+      height:22px;
+      background:#e5e7eb;
+      border-radius:8px;
+      overflow:hidden;
+      border:3px solid var(--blue2);
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      background:var(--blue2);
+      transition:width .3s linear;
+    }
+
+    /* Controls */
+    .controls{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:10px 12px 18px;
+    }
+    .controls .group{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border:2px solid var(--grey);
+      border-radius:12px;
+      background:#fff;
+    }
+    label{
+      font-weight:900;
+      color:#374151;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      font-size:12px;
+    }
+    input,select{
+      height:42px;
+      border-radius:10px;
+      border:2px solid #cbd5e1;
+      padding:0 10px;
+      font-weight:900;
+      background:#fff;
+      outline:none;
+    }
+    input:focus,select:focus{border-color:var(--blue2)}
+    .btn{
+      height:44px;
+      border:none;
+      border-radius:12px;
+      padding:0 16px;
+      font-weight:1000;
+      cursor:pointer;
+      letter-spacing:.02em;
+    }
+    .btn.blue{background:var(--blue2);color:#fff}
+    .btn.grey{background:#e5e7eb;color:#111827}
+    .btn.outline{
+      background:#fff;
+      color:var(--blue2);
+      border:3px solid var(--blue2);
+    }
+    .switch{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:1000;
+      color:var(--blue2);
+    }
+    .switch input{width:18px;height:18px}
+
+    /* Paper block (simple) */
+    .paper{
+      width:min(1180px,92vw);
+      margin:0 auto 26px;
+      border:3px solid var(--blue2);
+      border-radius:14px;
+      padding:16px;
+    }
+    .paper .h{
+      font-weight:1000;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      font-size:13px;
+      color:#111827;
+      border-bottom:2px solid #e5e7eb;
+      padding-bottom:10px;
+      margin-bottom:14px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 260px 1fr;
+      gap:12px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    @media (max-width:720px){
+      .bigclock{font-size:68px}
+      .grid{grid-template-columns:1fr}
+      .logo img{height:34px}
+      .rule{width:110px;height:110px}
+      .card{width:min(92vw,340px)}
+      .badge{width:min(92vw,340px)}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.logo img,
+.logo-container img,
+.topbar img {
+  max-height: 45px !important;
+  height: auto !important;
+  width: auto !important;
+}
+
+</style>
+</head>
+
+<body>
+
+  <div class="topbar">
+ <div class="logo-container">
+    <img src="logos-small.jpg" alt="GSR AEFE">
+</div>
+  <div class="title">Affichage Examen</div>
+</div>
+
+  <div class="hero">
+    <div class="date" id="date">—</div>
+    <div class="bigclock" id="clock">--:--:--</div>
+    <div class="sub">
+      <div class="label">Temps restant</div>
+      <div class="remain" id="remain">--:--</div>
+    </div>
+  </div>
+
+  <!-- ICÔNES (style copie-examen) -->
+  <div class="rules">
+    <div class="rule">
+      <!-- Smartphone -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="var(--red)" d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 3v14h10V5H7zm3 15h4v1h-4v-1z"/>
+        <path fill="var(--red)" d="M4 5l15 15-1.6 1.6L2.4 6.6 4 5z"/>
+      </svg>
+      <div class="txt">Smartphone</div>
+    </div>
+
+    <div class="rule">
+      <!-- Montre connectée -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="var(--red)" d="M9 2h6l1 3H8l1-3zm-1 17h8l-1 3H9l-1-3zm4-13a6 6 0 1 1 0 12a6 6 0 0 1 0-12zm0 2.2a3.8 3.8 0 1 0 0 7.6a3.8 3.8 0 0 0 0-7.6z"/>
+        <path fill="var(--red)" d="M4 5l15 15-1.6 1.6L2.4 6.6 4 5z"/>
+      </svg>
+      <div class="txt">Montre<br>connectée</div>
+    </div>
+
+    <div class="rule">
+      <!-- Sortie -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="var(--red)" d="M4 4h10v4H6v12h8v2H4V4zm10 7h3.2l-1.6-1.6L17 8l4 4-4 4-1.4-1.4 1.6-1.6H14v-2z"/>
+        <path fill="var(--red)" d="M4 5l15 15-1.6 1.6L2.4 6.6 4 5z"/>
+      </svg>
+      <div class="txt">Sortie<br>avant 1h</div>
+    </div>
+
+    <div class="rule">
+      <!-- Sac -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="var(--red)" d="M7 7V6a5 5 0 0 1 10 0v1h2v15H5V7h2zm2 0h6V6a3 3 0 0 0-6 0v1z"/>
+        <path fill="var(--red)" d="M4 5l15 15-1.6 1.6L2.4 6.6 4 5z"/>
+      </svg>
+      <div class="txt">Sacs<br>près des<br>tables</div>
+    </div>
+
+    <div class="rule">
+      <!-- Bavardage -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="var(--red)" d="M4 4h16v11H7l-3 3V4zm3 5h10v2H7V9zm0-3h10v2H7V6z"/>
+        <path fill="var(--red)" d="M4 5l15 15-1.6 1.6L2.4 6.6 4 5z"/>
+      </svg>
+      <div class="txt">Bavardage</div>
+    </div>
+  </div>
+
+  <!-- CARTES (Début / Durée / Fin / Tiers-temps) -->
+  <div class="cards">
+    <div class="card">
+      <div class="k">Début</div>
+      <div class="v" id="vStart">--:--</div>
+    </div>
+
+    <div class="card primary">
+      <div class="k">Durée</div>
+      <div class="v" id="vDur">--:--</div>
+    </div>
+
+    <div class="card">
+      <div class="k">Fin</div>
+      <div class="v" id="vEnd">--:--</div>
+    </div>
+
+    <div class="badge" id="badgeTT" style="opacity:.35">
+      <span>⅓</span> <span>Tiers-temps</span>
+    </div>
+  </div>
+
+  <!-- BARRE -->
+  <div class="barWrap">
+    <div class="bar"><div id="barFill"></div></div>
+  </div>
+
+  <!-- CONTROLES -->
+  <div class="controls">
+    <div class="group">
+      <label for="start">Début</label>
+      <input type="time" id="start" value="08:00">
+    </div>
+
+    <div class="group">
+      <label for="duration">Durée (min)</label>
+      <input type="number" id="duration" value="60" min="1" step="1">
+    </div>
+
+    <div class="group switch">
+      <input type="checkbox" id="tiers">
+      <label for="tiers" style="margin:0">⅓ Tiers-temps</label>
+    </div>
+
+    <button class="btn blue" id="btnStart">Lancer</button>
+    <button class="btn grey" id="btnReset">Reset</button>
+    <button class="btn outline" id="btnFull">Plein écran</button>
+  </div>
+
+  <!-- BLOC “Informations à reporter…” (simple, propre) -->
+  <div class="paper">
+    <div class="h">Informations à reporter sur la copie</div>
+
+    <div class="grid">
+      <label>Examen ou concours :</label>
+      <select id="examen">
+        <option value="DNB">DNB</option>
+        <option value="BAC">Baccalauréat</option>
+      </select>
+    </div>
+
+    <div class="grid">
+      <label>Voie :</label>
+      <select id="voie">
+        <option>Générale</option>
+        <option>STMG</option>
+        <option>STI2D</option>
+        <option>OIB</option>
+        <option>ESABAC</option>
+      </select>
+    </div>
+
+    <div class="grid">
+      <label>Niveau :</label>
+      <select id="niveau">
+        <option>Première</option>
+        <option>Terminale</option>
+      </select>
+    </div>
+
+    <div class="grid">
+      <label>Épreuve / Sous-épreuve :</label>
+      <select id="epreuve">
+        <option>— Choisir —</option>
+        <option>Français</option>
+        <option>Philosophie</option>
+        <option>Histoire-Géographie</option>
+        <option>Mathématiques</option>
+        <option>Physique-Chimie</option>
+        <option>SVT</option>
+        <option>SES</option>
+        <option>HLP</option>
+        <option>LLCE</option>
+        <option>STMG – Management / Droit-Éco / Spé</option>
+        <option>STI2D – Spécialité / Techno</option>
+      </select>
+    </div>
+  </div>
+
+  <script>
+    // --- Clock date/time ---
+    function two(n){ return String(n).padStart(2,'0'); }
+    function fmtHM(d){ return two(d.getHours())+":"+two(d.getMinutes()); }
+    function fmtHMS(d){ return two(d.getHours())+":"+two(d.getMinutes())+":"+two(d.getSeconds()); }
+
+    const elDate = document.getElementById("date");
+    const elClock = document.getElementById("clock");
+    const elRemain = document.getElementById("remain");
+
+    const vStart = document.getElementById("vStart");
+    const vDur   = document.getElementById("vDur");
+    const vEnd   = document.getElementById("vEnd");
+    const barFill= document.getElementById("barFill");
+
+    const startInput = document.getElementById("start");
+    const durInput   = document.getElementById("duration");
+    const tiersInput = document.getElementById("tiers");
+    const badgeTT    = document.getElementById("badgeTT");
+
+    let timer = null;
+    let startDate = null;
+    let endDate = null;
+    let baseMinutes = 0;
+
+    function updateNow(){
+      const d = new Date();
+      elDate.textContent = d.toLocaleDateString("fr-FR", {weekday:"long", year:"numeric", month:"long", day:"numeric"});
+      elClock.textContent = fmtHMS(d);
+
+      // si chrono en cours -> maj
+      if(startDate && endDate){
+        const now = new Date();
+        const total = endDate - startDate;
+        const left = endDate - now;
+
+        if(left <= 0){
+          elRemain.textContent = "00:00";
+          barFill.style.width = "100%";
+          clearInterval(timer);
+          timer = null;
+          return;
+        }
+
+        const min = Math.floor(left/60000);
+        const sec = Math.floor((left%60000)/1000);
+        elRemain.textContent = two(min)+":"+two(sec);
+
+        const done = Math.max(0, Math.min(1, (now - startDate)/total));
+        barFill.style.width = (done*100).toFixed(1)+"%";
+      }
+    }
+    setInterval(updateNow, 250);
+    updateNow();
+
+    function computeTimes(){
+      // base minutes
+      baseMinutes = parseInt(durInput.value || "0", 10);
+      let minutes = baseMinutes;
+
+      if(tiersInput.checked){
+        minutes = Math.round(baseMinutes * 4/3); // +33%
+        badgeTT.style.opacity = "1";
+      }else{
+        badgeTT.style.opacity = ".35";
+      }
+
+      // start time chosen for today
+      const now = new Date();
+      const [h,m] = (startInput.value || "08:00").split(":").map(Number);
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+      endDate = new Date(startDate.getTime() + minutes*60000);
+
+      // update cards
+      vStart.textContent = fmtHM(startDate);
+
+      const hh = Math.floor(minutes/60);
+      const mm = minutes%60;
+      vDur.textContent = two(hh)+":"+two(mm);
+
+      vEnd.textContent = fmtHM(endDate);
+
+      // init bar + remain
+      barFill.style.width = "0%";
+      elRemain.textContent = "--:--";
+    }
+
+    function startTimer(){
+      computeTimes();
+      if(timer) clearInterval(timer);
+      timer = setInterval(()=>{}, 1000); // le rendu est géré par updateNow()
+      updateNow();
+    }
+
+    function resetTimer(){
+      if(timer) clearInterval(timer);
+      timer = null;
+      startDate = null;
+      endDate = null;
+      elRemain.textContent = "--:--";
+      barFill.style.width = "0%";
+      vStart.textContent = "--:--";
+      vDur.textContent = "--:--";
+      vEnd.textContent = "--:--";
+    }
+
+    // Buttons
+    document.getElementById("btnStart").addEventListener("click", startTimer);
+    document.getElementById("btnReset").addEventListener("click", resetTimer);
+
+    // Recompute preview when inputs change (without launching)
+    [startInput, durInput, tiersInput].forEach(el=>{
+      el.addEventListener("change", ()=>{
+        // juste maj visuelle des cartes (sans lancer)
+        computeTimes();
+      });
+    });
+    computeTimes();
+
+    // Fullscreen
+    document.getElementById("btnFull").addEventListener("click", ()=>{
+      const docEl = document.documentElement;
+      if(!document.fullscreenElement){
+        docEl.requestFullscreen?.();
+      }else{
+        document.exitFullscreen?.();
+      }
+    });
+  </script>
+
+</body>
+</html>
